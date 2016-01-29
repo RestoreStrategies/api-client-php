@@ -122,7 +122,7 @@ class ForTheCityClient {
 	private $token;
 	private $secret;
 	private $host = 'https://api.forthecity.org';
-	private $port = 443;
+	private $port;
 	private $algorithm = 'sha256';
 	private $credentials;
 
@@ -138,6 +138,18 @@ class ForTheCityClient {
 		if ($port) {
 			$this->port = $port;
 		}
+		else {
+			$scheme = parse_url($this->host, PHP_URL_SCHEME);
+
+			if ($scheme == 'http') {
+				$this->port = 80;
+			}
+			else {
+				$this->port = 443;
+			}
+		}
+
+		$this->host = $this->host . ':' . $this->port;
 
 		$this->credentials = [
 			'id' => $this->token,
@@ -146,13 +158,44 @@ class ForTheCityClient {
 		];
 	}
 
-	private function apiRequest() {}
+	private function apiRequest($path, $verb, $data = null) {
+
+		$uri = $this->host . $path;
+
+		$hawkOptions = [
+			'credentials' => $this->credentials,
+		];
+
+		if ($data) {
+			$hawkOptions['ext'] = $data;
+		}
+
+		$header = HawkHeader::generate($uri, $verb, $hawkOptions);
+
+		$curlSession = curl_init();
+		$curlOptions = [
+			CURLOPT_HTTPHEADER => [
+				'Content-type: Application+JSON',
+				'api-version: 1',
+				'Authorization: ' . $header['field']
+			],
+			CURLOPT_URL => $uri
+		];
+
+		curl_setopt_array($curlSession, $curlOptions);
+
+		return curl_exec($curlSession);
+	}
 
 	private function generateHeader() {}
 
 	private function paramsToString() {}
 
-	public function getOpportunity() {}
+	function getOpportunity($id) {
+
+		$path = '/api/opportunities/' . $id;
+		return ForTheCityClient::apiRequest($path, 'GET');
+	}
 
 	public function listOpportunities() {}
 
