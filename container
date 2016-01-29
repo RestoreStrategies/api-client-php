@@ -1,0 +1,114 @@
+#!/bin/bash
+
+# Name of image & container.
+image_name='forthecity-client-php'
+container_name='forthecity-client-php'
+
+# Make environment variables available
+source env.sh
+
+# Build docker image based on Dockerfile, if creating or starting container.
+if [ "$1" = "-c" ] || [ "$1" = "-s" ] || [ "$1" = "-r" ] || [ "$1" = "-t" ]; then
+	echo "Building $image_name image..."
+	docker build -t "$image_name" .
+fi
+
+# -h
+# Print help.
+if [ "$1" = "-h" ]; then
+	help_output= cat <<HelpText
+APP DOCKER MANAGER
+
+This script manages Docker for this application. It may need to be run as
+the root user on your system. The create, test, start & restart flags attempt
+to build or rebuild the image based on the Dockerfile before executing.
+
+ARGUMENTS
+
+	-h
+	 	Prints help text.
+
+	-c
+		Creates & starts a container based on '$container_name' image.
+
+	-i
+		Inspects the container named '$container_name'.
+
+	-l
+		Displays the log of the container.
+
+	-t
+		Runs the test suite for the application.
+
+	--interactive
+		Runs an interactive container.
+
+	--status
+		Shows status of the container.
+
+	--stop
+		Stops a container named '$container_name'.
+
+	--delete
+		Deletes a container named '$container_name'.
+HelpText
+
+	echo $help_output
+fi
+
+# -c
+# Creates & runs the container.
+if [ "$1" = "-c" ]; then
+	echo "Creating & starting $containter_name container..."
+	docker run -d -v $PWD:/opt/app -e HOST=$HOST -e PORT=$PORT \
+	-e TOKEN=$TOKEN -e SECRET=$SECRET -e NODE_ENV="test" \
+	--name="$container_name" --link forthecity-api:api $image_name
+fi
+
+# -i
+# Inspects container.
+if [ "$1" = "-i" ]; then
+	docker inspect $container_name
+fi
+
+# -l
+# Show logs.
+if [ "$1" = "-l" ]; then
+	docker logs -f -t $container_name
+fi
+
+# -t
+# Run tests.
+if [ "$1" = "-t" ]; then
+	docker run --rm -v $PWD:/opt/app -e HOST=$HOST -e PORT=$PORT \
+	-e TOKEN=$TOKEN -e SECRET=$SECRET -e NODE_ENV='test' \
+	--link forthecity-api:api $image_name /bin/bash -c "npm test"
+fi
+
+# --interactive
+# Run interactive container
+if [ "$1" = "--interactive" ]; then
+	docker run --rm -i -t -v $PWD:/opt/app -e HOST=$HOST -e PORT=$PORT \
+	-e TOKEN=$TOKEN -e SECRET=$SECRET \
+	--link forthecity-api:api $image_name /bin/bash
+fi
+
+# --status
+# Shows status.
+if [ "$1" = "--status" ]; then
+	docker ps -a --filter "name=$container_name"
+fi
+
+# --stop
+# Stop the container.
+if [ "$1" = "--stop" ]; then
+	echo "Stopping $container_name container..."
+	docker stop --time=0 $container_name
+fi
+
+# --delete
+# Deletes container.
+if [ "$1" = "--delete" ]; then
+	echo "Deleting $container_name container..."
+	docker rm $container_name
+fi
