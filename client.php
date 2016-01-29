@@ -113,28 +113,48 @@ class HawkHeader {
 	    return $result;
 	}
 }
-/*
-$type = 'header';
-$credentials = [ 'id' => 'dev_token', 'key' => 'dev_secret' ];
 
-$hawkOptions = [
-    'credentials' => $credentials,
-    'method' => 'GET',
-];
+/**
+ *
+ */
+class ForTheCityClient {
 
-$uri = 'http://api.local:3000/api/opportunities';
-$header = HawkHeader::generate($uri, 'get', $hawkOptions);
+	private $token;
+	private $secret;
+	private $host = 'https://api.forthecity.org';
+	private $port = 443;
+	private $algorithm = 'sha256';
+	private $credentials;
 
-$cs = curl_init();
+	function __construct($token, $secret, $host = null, $port = null) {
 
-$options = array(
-	CURLOPT_HTTPHEADER => array('Content-type: Application+JSON',
-								'api-version: 1',
-								'Authorization: ' . $header['field']),
-	CURLOPT_URL => $uri
-);
+		$this->token = $token;
+		$this->secret = $secret;
 
-curl_setopt_array($cs, $options);
-$data  = curl_exec($cs);
-var_dump($data);
-*/
+		if ($host) {
+			$this->host = $host;
+		}
+
+		if ($port) {
+			$this->port = $port;
+		}
+
+		$this->credentials = [
+			'id' => $this->token,
+			'key' => $this->secret,
+			'algorithm' => $this->algorithm
+		];
+	}
+
+	private function apiRequest() {}
+
+	private function generateHeader() {}
+
+	private function paramsToString() {}
+
+	public function getOpportunity() {}
+
+	public function listOpportunities() {}
+
+	public function search() {}
+}
