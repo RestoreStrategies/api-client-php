@@ -201,36 +201,3 @@ class ForTheCityClient {
 
 	public function search() {}
 }
-
-
-$client = new ForTheCityClient('dev_token', 'dev_secret', 'http://staging.api.forthecity.org');
-//var_dump($client);
-
-$opp = $client->getOpportunity(1);
-var_dump($opp);
-
-/*
-$type = 'header';
-$credentials = [ 'id' => 'dev_token', 'key' => 'dev_secret' ];
-
-$hawkOptions = [
-    'credentials' => $credentials,
-    'method' => 'GET',
-];
-
-$uri = 'http://api.local:3000/api/opportunities';
-$header = HawkHeader::generate($uri, 'get', $hawkOptions);
-
-$cs = curl_init();
-
-$options = array(
-	CURLOPT_HTTPHEADER => array('Content-type: Application+JSON',
-								'api-version: 1',
-								'Authorization: ' . $header['field']),
-	CURLOPT_URL => $uri
-);
-
-curl_setopt_array($cs, $options);
-$data  = curl_exec($cs);
-var_dump($data);
-*/

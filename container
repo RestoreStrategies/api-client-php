@@ -61,8 +61,8 @@ fi
 if [ "$1" = "-c" ]; then
 	echo "Creating & starting $containter_name container..."
 	docker run -d -v $PWD:/opt/app -e HOST=$HOST -e PORT=$PORT \
-	-e TOKEN=$TOKEN -e SECRET=$SECRET -e NODE_ENV="test" \
-	--name="$container_name" --link forthecity-api:api $image_name
+	-e TOKEN=$TOKEN -e SECRET=$SECRET --name="$container_name" \
+	--link forthecity-api:api $image_name
 fi
 
 # -i
@@ -81,8 +81,9 @@ fi
 # Run tests.
 if [ "$1" = "-t" ]; then
 	docker run --rm -v $PWD:/opt/app -e HOST=$HOST -e PORT=$PORT \
-	-e TOKEN=$TOKEN -e SECRET=$SECRET -e NODE_ENV='test' \
-	--link forthecity-api:api $image_name /bin/bash -c "npm test"
+	-e TOKEN=$TOKEN -e SECRET=$SECRET --link forthecity-api:api \
+	$image_name /bin/bash -c \
+	"phpunit -v --debug --colors=always --bootstrap client.php client_test.php"
 fi
 
 # --interactive
