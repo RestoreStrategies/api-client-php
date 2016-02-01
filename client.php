@@ -5,11 +5,11 @@ class HawkHeader {
 	/**
 	* Calculate the request HMAC
 	*
-	* @param string $type			'header', 'bewit', or 'respnse'
-	* @param array  $credentials	[id, key, algorithm]
-	* @param array  $options		[ts, nonce, method, resource, host, port, hash, ext]
+	* @param string $type           'header', 'bewit', or 'respnse'
+	* @param array  $credentials    [id, key, algorithm]
+	* @param array  $options        [ts, nonce, method, resource, host, port, hash, ext]
 	*
-	* @return string				Base64 encoded MAC
+	* @return string                Base64 encoded MAC
 	*/
 	function calculateMac($type, $credentials, $options) {
 
@@ -23,10 +23,10 @@ class HawkHeader {
 	/**
 	* Normalize string for generating MAC
 	*
-	* @param string $type			'header', 'bewit', or 'respnse'
-	* @param array  $options		[ts, nonce, method, resource, host, port, hash, ext]
+	* @param string $type           'header', 'bewit', or 'respnse'
+	* @param array  $options        [ts, nonce, method, resource, host, port, hash, ext]
 	*
-	* @return string				Normalized string
+	* @return string                Normalized string
 	*/
 	function generateNormalizedString($type, $options) {
 
@@ -55,11 +55,11 @@ class HawkHeader {
 	/**
 	* Generate Hawk header
 	*
-	* @param string $uri		The reqest URI
-	* @param string $method		The HTTP verb
-	* @param array  $options	[credentials, ext, ts, nonce, localtimeOffsetMsec, playload, contentType, hash]
+	* @param string $uri        The reqest URI
+	* @param string $method     The HTTP verb
+	* @param array  $options    [credentials, ext, ts, nonce, localtimeOffsetMsec, playload, contentType, hash]
 	*
-	* @return array 			[field, artifacts]
+	* @return array             [field, artifacts]
 	*/
 	public static function generate($uri, $method, $options) {
 
@@ -201,3 +201,36 @@ class ForTheCityClient {
 
 	public function search() {}
 }
+
+
+$client = new ForTheCityClient('dev_token', 'dev_secret', 'http://staging.api.forthecity.org');
+//var_dump($client);
+
+$opp = $client->getOpportunity(1);
+var_dump($opp);
+
+/*
+$type = 'header';
+$credentials = [ 'id' => 'dev_token', 'key' => 'dev_secret' ];
+
+$hawkOptions = [
+    'credentials' => $credentials,
+    'method' => 'GET',
+];
+
+$uri = 'http://api.local:3000/api/opportunities';
+$header = HawkHeader::generate($uri, 'get', $hawkOptions);
+
+$cs = curl_init();
+
+$options = array(
+	CURLOPT_HTTPHEADER => array('Content-type: Application+JSON',
+								'api-version: 1',
+								'Authorization: ' . $header['field']),
+	CURLOPT_URL => $uri
+);
+
+curl_setopt_array($cs, $options);
+$data  = curl_exec($cs);
+var_dump($data);
+*/
