@@ -179,25 +179,32 @@ class ForTheCityClient {
 				'api-version: 1',
 				'Authorization: ' . $header['field']
 			],
-			CURLOPT_URL => $uri
+			CURLOPT_URL => $uri,
+			CURLOPT_RETURNTRANSFER => true
 		];
 
 		curl_setopt_array($curlSession, $curlOptions);
 
-		return curl_exec($curlSession);
+		return json_decode(curl_exec($curlSession));
 	}
 
 	private function generateHeader() {}
 
 	private function paramsToString() {}
 
-	function getOpportunity($id) {
+	public function getOpportunity($id) {
 
 		$path = '/api/opportunities/' . $id;
 		return ForTheCityClient::apiRequest($path, 'GET');
 	}
 
-	public function listOpportunities() {}
+	public function listOpportunities() {
+
+		$path = '/api/opportunities';
+
+		$result = ForTheCityClient::apiRequest($path, 'GET')->collection;
+		return $result;
+	}
 
 	public function search() {}
 }
