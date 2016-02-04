@@ -213,8 +213,36 @@ class ForTheCityClient {
 		return json_decode(curl_exec($curlSession));
 	}
 
-	private function paramsToString($params) {
+	/**
+	* Turn an array of data into a URL query string
+	*
+	* @param array $params  A array with keys & values
+	*
+	* @return string        A URL query string
+	*/
+	public function paramsToString($params) {
 
+		$queryArray = [];
+
+		if (!is_array($params)) {
+			return null;
+		}
+
+		foreach ($params as $key => $value) {
+
+			if(is_array($value)) {
+				foreach ($value as $subkey => $subvalue) {
+					array_push($queryArray, $key . '[]=' . urlencode($subvalue));
+				}
+			}
+			else {
+				array_push($queryArray, $key . '=' . urlencode($value));
+			}
+		}
+
+		$queryString = implode('&', $queryArray);
+
+		return $queryString;
 	}
 
 	/**
@@ -245,5 +273,12 @@ class ForTheCityClient {
 		return $result;
 	}
 
-	public function search() {}
+	public function search($params) {
+
+		$path = '/api/search?' . ForTheCityClient::paramsToString($params);
+
+		$result = ForTheCityClient::apiRequest($path, 'GET')->collection;
+
+		return $result;
+	}
 }
