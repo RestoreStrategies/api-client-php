@@ -7,7 +7,8 @@ class HawkHeader {
 	*
 	* @param string $type           'header', 'bewit', or 'respnse'
 	* @param array  $credentials    [id, key, algorithm]
-	* @param array  $options        [ts, nonce, method, resource, host, port, hash, ext]
+	* @param array  $options        [ts, nonce, method, resource, host, port,
+	*                                hash, ext]
 	*
 	* @return string                Base64 encoded MAC
 	*/
@@ -24,7 +25,8 @@ class HawkHeader {
 	* Normalize string for generating MAC
 	*
 	* @param string $type           'header', 'bewit', or 'respnse'
-	* @param array  $options        [ts, nonce, method, resource, host, port, hash, ext]
+	* @param array  $options        [ts, nonce, method, resource, host, port,
+	*                                hash, ext]
 	*
 	* @return string                Normalized string
 	*/
@@ -57,7 +59,9 @@ class HawkHeader {
 	*
 	* @param string $uri        The reqest URI
 	* @param string $method     The HTTP verb
-	* @param array  $options    [credentials, ext, ts, nonce, localtimeOffsetMsec, playload, contentType, hash]
+	* @param array  $options    [credentials, ext, ts, nonce,
+	*                            localtimeOffsetMsec, playload, contentType,
+	*                            hash]
 	*
 	* @return array             [field, artifacts]
 	*/
