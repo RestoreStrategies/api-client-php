@@ -101,8 +101,8 @@ class HawkHeader {
 	    }
 
 	    $mac = HawkHeader::calculateMac('header',
-										$options['credentials'],
-										$result['artifacts']);
+                                        $options['credentials'],
+                                        $result['artifacts']);
 
 	    $header = 'Hawk id="' . $options['credentials']['id'] .
 	                '", ts="' . $result['artifacts']['ts'] .
@@ -135,7 +135,7 @@ class ForTheCityClient {
 	/**
 	* Constructor
 	*
-	* @param string $token		A valid API user token
+	* @param string $token      A valid API user token
 	* @param string $secret     A valid API user secret
 	* @param string $host       (optional) Scheme + host (e.g. http://example.com).
 	*                           defaults to https://api.forthecity.org
@@ -220,7 +220,7 @@ class ForTheCityClient {
 	*
 	* @return string        A URL query string
 	*/
-	public function paramsToString($params) {
+	private function paramsToString($params) {
 
 		$queryArray = [];
 
