@@ -17,6 +17,15 @@ class ClientTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals($opp->href, "/api/opportunities/1");
     }
 
+    public function testNonexistingOpportunity() {
+
+        $opp = $this->client->getOpportunity(1000000);
+        
+        $this->assertEquals($opp->statusCode, 404);
+        $this->assertEquals($opp->error, "Not found");
+        $this->assertEquals($opp->message, "Opportunity not found");
+    }
+
     public function testListOpportunities() {
 
         $opps = $this->client->listOpportunities();
