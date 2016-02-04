@@ -11,7 +11,7 @@ class HawkHeader {
 	*
 	* @return string                Base64 encoded MAC
 	*/
-	function calculateMac($type, $credentials, $options) {
+	private static function calculateMac($type, $credentials, $options) {
 
 	    $normalized = HawkHeader::generateNormalizedString($type, $options);
 	    $hmac = hash_hmac('sha256', $normalized, $credentials['key'], true);
@@ -28,7 +28,7 @@ class HawkHeader {
 	*
 	* @return string                Normalized string
 	*/
-	function generateNormalizedString($type, $options) {
+	private static function generateNormalizedString($type, $options) {
 
 	    $resource = $options['resource'];
 
@@ -96,7 +96,9 @@ class HawkHeader {
 	        }
 	    }
 
-	    $mac = HawkHeader::calculateMac('header', $options['credentials'], $result['artifacts']);
+	    $mac = HawkHeader::calculateMac('header',
+										$options['credentials'],
+										$result['artifacts']);
 
 	    $header = 'Hawk id="' . $options['credentials']['id'] .
 	                '", ts="' . $result['artifacts']['ts'] .
@@ -126,7 +128,7 @@ class ForTheCityClient {
 	private $algorithm = 'sha256';
 	private $credentials;
 
-	function __construct($token, $secret, $host = null, $port = null) {
+	public function __construct($token, $secret, $host = null, $port = null) {
 
 		$this->token = $token;
 		$this->secret = $secret;
@@ -187,8 +189,6 @@ class ForTheCityClient {
 
 		return json_decode(curl_exec($curlSession));
 	}
-
-	private function generateHeader() {}
 
 	private function paramsToString() {}
 
