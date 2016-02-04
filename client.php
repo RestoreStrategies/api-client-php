@@ -132,6 +132,16 @@ class ForTheCityClient {
 	private $algorithm = 'sha256';
 	private $credentials;
 
+	/**
+	* Constructor
+	*
+	* @param string $token		A valid API user token
+	* @param string $secret     A valid API user secret
+	* @param string $host       (optional) Scheme + host (e.g. http://example.com).
+	*                           defaults to https://api.forthecity.org
+	* @param integer $port      (optional) TCP port, defaults to 80 or 443
+	*                           depending on the scheme used on the host
+	*/
 	public function __construct($token, $secret, $host = null, $port = null) {
 
 		$this->token = $token;
@@ -164,6 +174,15 @@ class ForTheCityClient {
 		];
 	}
 
+	/**
+	* Make an API request
+	*
+	* @param string $path   A valid URL path
+	* @param string $verb   An HTTP verb
+	* @param string $data   (optional) Data to be sent to the server, e.g. in a
+	*                       POST request
+	* @return object        An objectified version of the server's JSON response
+	*/
 	private function apiRequest($path, $verb, $data = null) {
 
 		$uri = $this->host . $path;
@@ -194,14 +213,30 @@ class ForTheCityClient {
 		return json_decode(curl_exec($curlSession));
 	}
 
-	private function paramsToString() {}
+	private function paramsToString($params) {
 
+	}
+
+	/**
+	* GET a specific opportunity
+	*
+	* @param integer $id    The id of an opportunity
+	*
+	* @return object        An objectified version of the server's JSON
+	*                       response. Normally, this will either be an
+	*                       opportunity or a 404 message.
+	*/
 	public function getOpportunity($id) {
 
 		$path = '/api/opportunities/' . $id;
 		return ForTheCityClient::apiRequest($path, 'GET');
 	}
 
+	/**
+	* Get a list of all opportunities
+	*
+	* @return object	An objectified version of the server's JSON response
+	*/
 	public function listOpportunities() {
 
 		$path = '/api/opportunities';
