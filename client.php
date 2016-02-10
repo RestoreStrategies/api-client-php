@@ -257,6 +257,7 @@ class ForTheCityClient {
 	public function getOpportunity($id) {
 
 		$path = '/api/opportunities/' . $id;
+
 		return ForTheCityClient::apiRequest($path, 'GET');
 	}
 
@@ -268,15 +269,14 @@ class ForTheCityClient {
 	public function listOpportunities() {
 
 		$path = '/api/opportunities';
-
 		$result = ForTheCityClient::apiRequest($path, 'GET')->collection;
+
 		return $result;
 	}
 
 	public function search($params) {
 
 		$path = '/api/search?' . ForTheCityClient::paramsToString($params);
-
 		$result = ForTheCityClient::apiRequest($path, 'GET')->collection;
 
 		return $result;
