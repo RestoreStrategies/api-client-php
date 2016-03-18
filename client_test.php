@@ -80,7 +80,7 @@ class ClientTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(is_array($opps->items), true);
     }
 
-    /*public function testPostSignup() {
+    public function testPostSignup() {
 
         $template = "{
             \"template\": {
@@ -89,19 +89,16 @@ class ClientTest extends PHPUnit_Framework_TestCase {
                     { \"name\": \"familyName\", \"value\": \"Johnson\" },
                     { \"name\": \"telephone\", \"value\": \"829-384-6743\" },
                     { \"name\": \"email\", \"value\": \"timothy.johnson@fakeemail.com\" },
-                    { \"name\": \"church\", \"value\": \"Austin Stone Community Church\" },
-                    { \"name\": \"churchOther\", \"value\": \"\" },
-                    { \"name\": \"churchCampus\", \"value\": \"Downtown PM\" },
                     { \"name\": \"comment\", \"value\": \"\" },
                     { \"name\": \"numOfItemsCommitted\", \"value\": 2 },
-                    { \"name\": \"lead\", \"object\": {\"1\": true, \"6\": true} }
+                    { \"name\": \"lead\", \"object\": {\"stageAnnouncement,churchBulletinOrFlier\"} }
                 ]
             }
         }";
 
         $opps = $this->client->postSignup(1, $template);
         $this->assertEquals($opps->statusCode, 201);
-    }*/
+    }
 
     public function testGetSignup() {
         $signup = $this->client->getSignup(1);

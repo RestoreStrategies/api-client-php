@@ -287,6 +287,7 @@ class ForTheCityClient {
 		$signup = null;
 		$opp = $this->getOpportunity($id);
 		$href = $this->_findRelationHref($opp, 'signup');
+		$response = null;
 
 		if ($href !== null) {
 			$response = ForTheCityClient::apiRequest($href, 'GET');
@@ -297,9 +298,15 @@ class ForTheCityClient {
 
 	public function submitSignup($id, $template) {
 
-		$path = '/api/opportunities' . $id . '/signup';
+		$opp = $this->getOpportunity($id);
+		$href = $this->_findRelationHref($opp, 'signup');
+		$response = null;
 
-		return ForTheCityClient::apiRequest($path, 'POST', $template);
+		if ($href !== null) {
+			$response = ForTheCityClient::apiRequest($href, 'POST', $template);
+		}
+
+		return $response;
 	}
 
 	private function _findRelationHref($collection, $relation) {
