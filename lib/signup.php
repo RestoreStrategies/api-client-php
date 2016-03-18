@@ -6,7 +6,6 @@
 class SignUp {
     protected $rawCollection = null;
     protected $template;
-    protected $html = [];
     protected $idHeader = "ftc-signup";
     protected $validationTypes = array("inclusion", "exclusion", "presence", "length", "multi", "range", "fileSize", "fileType");
     protected $domDoc;
@@ -61,20 +60,6 @@ class SignUp {
                 $element = $this->_createHTMLInput($class, $dataName, "email", "email", null);
                 $this->_addValidations($dataName, $dependentOption, $element);
                 $element = $this->_wrapHTMLElementInLabel($element, $prompt, $class);
-            }
-            else if($dataName === "hasChurch") {
-                $element = $this->_createSelectionList($class, $dataName, $dependentOption, "radio", $prompt);
-            }
-            else if($dataName === "church") {
-                $element = $this->_createSelectionList($class, $dataName, $dependentOption, "radio", $prompt);
-            }
-            else if($dataName === "churchOther") {
-                $element = $this->_createHTMLInput($class, $dataName, "text", null, null);
-                $this->_addValidations($dataName, $dependentOption, $element);
-                $element = $this->_wrapHTMLElementInLabel($element, $prompt, $class);
-            }
-            else if($dataName === "churchCampus") {
-                $element = $this->_createSelectionList($class, $dataName, $dependentOption, "radio", $prompt);
             }
             else if($dataName === "comment") {
                 $element = $this->_createHTMLInput($class, $dataName, "textarea", null, null);

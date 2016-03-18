@@ -104,11 +104,12 @@ class ClientTest extends PHPUnit_Framework_TestCase {
     }*/
 
     public function testGetSignup() {
-        // Will throw an error if the signup wasn't recieved or isn't in the right format.
         $signup = $this->client->getSignup(1);
+        $this->assertEquals($signup->collection->version, "1.0");
+        $this->assertEquals(is_array($signup->collection->template->data), true);
     }
 
-    public function loadTestSignup() {
+    /*public function loadTestSignup() {
         $templateFile = fopen("./lib/signupTemplate.json", "r");
         $templateJSON = "";
 
@@ -144,5 +145,5 @@ class ClientTest extends PHPUnit_Framework_TestCase {
 
         $optionsEmpty = $signup->getOptions("church", "no");
         $this->assertEquals(count($optionsEmpty), 0);
-    }
+    }*/
 }

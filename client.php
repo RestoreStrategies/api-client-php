@@ -290,10 +290,9 @@ class ForTheCityClient {
 
 		if ($href !== null) {
 			$response = ForTheCityClient::apiRequest($href, 'GET');
-			$signup = new SignUp($response);
 		}
 
-		return $signup;
+		return $response;
 	}
 
 	public function submitSignup($id, $template) {
