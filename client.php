@@ -200,7 +200,7 @@ class ForTheCityClient {
 		$curlSession = curl_init();
 		$curlOptions = [
 			CURLOPT_HTTPHEADER => [
-				'Content-type: Application+JSON',
+				'Content-type: Collection+JSON',
 				'api-version: 1',
 				'Authorization: ' . $header['field']
 			],
@@ -280,5 +280,42 @@ class ForTheCityClient {
 		$result = ForTheCityClient::apiRequest($path, 'GET')->collection;
 
 		return $result;
+	}
+
+	public function getSignup($id) {
+
+		$signup = null;
+		$opp = $this->getOpportunity($id);
+		$href = $this->_findRelationHref($opp, 'signup');
+
+		if ($href !== null) {
+			$response = ForTheCityClient::apiRequest($href, 'GET');
+			$signup = new SignUp($response);
+		}
+
+		return $signup;
+	}
+
+	public function submitSignup($id, $template) {
+
+		$path = '/api/opportunities' . $id . '/signup';
+
+		return ForTheCityClient::apiRequest($path, 'POST', $template);
+	}
+
+	private function _findRelationHref($collection, $relation) {
+
+		$items = $collection->collection->items;
+
+		foreach ($items as $item) {
+			$links = $item->links;
+			if ($links !== null) {
+				foreach ($links as $link) {
+					if ($link->rel === $relation) {
+						return $link->href;
+					}
+				}
+			}
+		}
 	}
 }
