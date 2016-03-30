@@ -14,16 +14,19 @@ class ClientTest extends PHPUnit_Framework_TestCase {
     public function testGetOpportunity() {
 
         $opp = $this->client->getOpportunity(1);
-        $this->assertEquals($opp->href, "/api/opportunities/1");
+
+        $href = $opp->collection->href;
+        $this->assertEquals($href, "/api/opportunities/1");
     }
 
     public function testNonexistingOpportunity() {
 
         $opp = $this->client->getOpportunity(1000000);
 
-        $this->assertEquals($opp->statusCode, 404);
-        $this->assertEquals($opp->error, "Not found");
-        $this->assertEquals($opp->message, "Opportunity not found");
+        $error = $opp->collection->error;
+        $this->assertEquals($error->code, 404);
+        $this->assertEquals($error->title, "Not found");
+        $this->assertEquals($error->message, "Opportunity not found");
     }
 
     public function testListOpportunities() {
