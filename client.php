@@ -2,6 +2,8 @@
 
 class HawkHeader {
 
+	private static $headerVersion = 1;
+
 	/**
 	* Calculate the request HMAC
 	*
@@ -41,7 +43,8 @@ class HawkHeader {
 	                    $resource . "\n" .
 	                    strtolower($options['host']) . "\n" .
 	                    $options['port'] . "\n" .
-	                    $options['hash'] . "\n";
+						$options['hash'] . "\n";
+
 
 	    if ($options['ext']) {
 	         $ext = str_replace("\\", "\\\\", $options['ext']);
@@ -65,12 +68,15 @@ class HawkHeader {
 	*
 	* @return array             [field, artifacts]
 	*/
-	public static function generate($uri, $method, $options) {
+	public static function generate($options) {
 
 	    $result = [
 	        'field' => '',
 	        'artifacts' => []
 	    ];
+
+		$uri = $options['uri'];
+		$method = $options['method'];
 
 	    $host = parse_url($uri, PHP_URL_HOST);
 	    $port = parse_url($uri, PHP_URL_PORT);
@@ -88,8 +94,8 @@ class HawkHeader {
 	        'resource' => $resource,
 	        'host' => $host,
 	        'port' => $port,
-	        'hash' => $options['hash'],
-	        'ext' => $options['ext']
+			'hash' => $options['hash'],
+			'ext' => $options['ext']
 	    ];
 
 	    foreach (array_keys($result['artifacts']) as $key) {
@@ -123,7 +129,7 @@ class HawkHeader {
 /**
  *
  */
-class ForTheCityClient {
+class RestoreStrategiesClient {
 
 	private $token;
 	private $secret;
@@ -131,6 +137,8 @@ class ForTheCityClient {
 	private $port;
 	private $algorithm = 'sha256';
 	private $credentials;
+	//private const $cachingDisabled = true;
+	private const $restfulUrisDisabled = true;
 
 	/**
 	* Constructor
@@ -187,30 +195,38 @@ class ForTheCityClient {
 
 		$uri = $this->host . $path;
 
-		$hawkOptions = [
-			'credentials' => $this->credentials,
-		];
-
-		if ($data) {
-			$hawkOptions['ext'] = $data;
-		}
-
-		$header = HawkHeader::generate($uri, $verb, $hawkOptions);
+		$opts = array(
+			'method'=>"" . $verb,
+			'header'=>array('Content-type'=> "application/vnd.collection+json",
+					'api-version'=> "1"),
+			'uri'=> $uri,
+			'ext'=> '',
+			'credentials' => $this->credentials
+		);
 
 		$curlSession = curl_init();
-		$curlOptions = [
-			CURLOPT_HTTPHEADER => [
-				'Content-type: Collection+JSON',
-				'api-version: 1',
-				'Authorization: ' . $header['field']
-			],
-			CURLOPT_URL => $uri,
-			CURLOPT_RETURNTRANSFER => true
-		];
+
+		$verb = strtolower($verb);
+
+		if ($verb === 'post') {
+			$curlOptions[CURLOPT_POSTFIELDS] = $data;
+		}
+
+		$header = HawkHeader::generate($opts);
+
+		$curlOptions[CURLOPT_URL] = $uri;
+		$curlOptions[CURLOPT_RETURNTRANSFER] = true;
 
 		curl_setopt_array($curlSession, $curlOptions);
+		curl_setopt($curlSession, CURLOPT_HTTPHEADER, array(
+				'Content-type: application/vnd.collection+json',
+				'api-version: 1',
+				'Authorization: ' . $header['field']
+		));
 
-		return json_decode(curl_exec($curlSession));
+		$response = json_decode(curl_exec($curlSession));
+
+		return $response;
 	}
 
 	/**
@@ -256,9 +272,11 @@ class ForTheCityClient {
 	*/
 	public function getOpportunity($id) {
 
-		$path = '/api/opportunities/' . $id;
+		$response = $this->search(array(
+			'id'=> "" . $id
+		));
 
-		return ForTheCityClient::apiRequest($path, 'GET');
+		return $response;
 	}
 
 	/**
@@ -268,29 +286,51 @@ class ForTheCityClient {
 	*/
 	public function listOpportunities() {
 
-		$path = '/api/opportunities';
-		$result = ForTheCityClient::apiRequest($path, 'GET')->collection;
+		if ($this->restfulUrisDisabled) {
+			$href = '/api/opportunities';
+		}
+		else {
+			$entryPoint = $this->getEntryPoint();
+			$href = $this->getRelationHref($entryPoint->collection->links, 'opportunities');
+		}
 
-		return $result;
+		if ($href !== null) {
+			$response = $this->apiRequest($href, 'GET');
+		}
+
+		return $response;
 	}
 
 	public function search($params) {
 
-		$path = '/api/search?' . ForTheCityClient::paramsToString($params);
-		$result = ForTheCityClient::apiRequest($path, 'GET')->collection;
+		if ($this->restfulUrisDisabled) {
+			$href = '/api/search';
+		}
+		else {
+			$entryPoint = $this->getEntryPoint();
+			$href = $this->getRelationHref($entryPoint->collection->links, 'search');
+		}
 
-		return $result;
+		if ($href !== null) {
+			$href .= "?" . $this->paramsToString($params);
+			$response = $this->apiRequest($href, 'GET');
+		}
+
+		return $response;
 	}
 
 	public function getSignup($id) {
 
-		$signup = null;
-		$opp = $this->getOpportunity($id);
-		$href = $this->_findRelationHref($opp, 'signup');
-		$response = null;
+		if ($this->restfulUrisDisabled) {
+			$href = '/api/opportunities/' . $id . '/signup';
+		}
+		else {
+			$opp = $this->getOpportunity($id);
+			$href = $this->getRelationHref($opp->collection->items[0]->links, 'signup');
+		}
 
 		if ($href !== null) {
-			$response = ForTheCityClient::apiRequest($href, 'GET');
+			$response = $this->apiRequest($href, 'GET');
 		}
 
 		return $response;
@@ -298,30 +338,45 @@ class ForTheCityClient {
 
 	public function submitSignup($id, $template) {
 
-		$opp = $this->getOpportunity($id);
-		$href = $this->_findRelationHref($opp, 'signup');
-		$response = null;
+		if ($this->restfulUrisDisabled) {
+			$href = '/api/opportunities/' . $id . '/signup';
+		}
+		else {
+			$opp = $this->getOpportunity($id);
+			$href = $this->getRelationHref($opp->collection->items[0]->links, 'signup');
+		}
 
 		if ($href !== null) {
-			$response = ForTheCityClient::apiRequest($href, 'POST', $template);
+			$response = $this->apiRequest($href, 'POST', $template);
 		}
 
 		return $response;
 	}
 
-	private function _findRelationHref($collection, $relation) {
+	private function getEntryPoint() {
 
-		$items = $collection->collection->items;
+		$response = $this->apiRequest('/api', 'GET');
+		return $response;
+	}
 
-		foreach ($items as $item) {
-			$links = $item->links;
-			if ($links !== null) {
-				foreach ($links as $link) {
-					if ($link->rel === $relation) {
-						return $link->href;
-					}
+	private function getRelationHref($data, $relation) {
+
+		if (is_array($data)) {
+			foreach ($data as $datum) {
+				if ($datum->rel === $relation) {
+					return $datum->href;
 				}
 			}
 		}
+		else {
+			if ($data->rel === $relation) {
+				return $data->href;
+			}
+		}
 	}
+
+	/*private function getFromCache($path) {
+		//TODO: add caching for appropriate stateful clients
+		return null;
+	}*/
 }

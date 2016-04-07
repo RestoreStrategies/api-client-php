@@ -7,7 +7,7 @@ class ClientTest extends PHPUnit_Framework_TestCase {
     private $client;
 
     public function __construct() {
-        $this->client = new ForTheCityClient($_ENV['TOKEN'],
+        $this->client = new RestoreStrategiesClient($_ENV['TOKEN'],
                                                 $_ENV['SECRET'],
                                                 $_ENV['HOST'],
                                                 $_ENV['PORT']);
@@ -16,21 +16,29 @@ class ClientTest extends PHPUnit_Framework_TestCase {
     public function testGetOpportunity() {
 
         $opp = $this->client->getOpportunity(1)->collection;
-        $this->assertEquals($opp->href, "/api/opportunities/1");
+        $data = $opp->items[0]->data;
+        $found = false;
+        if (is_array($data)) {
+            foreach ($data as $datum) {
+                if ($datum->name === 'id' && $datum->value === '1') {
+                    $found = true;
+                    break;
+                }
+            }
+        }
+        $this->assertTrue($found);
     }
 
     public function testNonexistingOpportunity() {
 
-        $opp = $this->client->getOpportunity(1000000)->collection->error;
+        $opp = $this->client->getOpportunity(1000000)->collection;
 
-        $this->assertEquals($opp->code, 404);
-        $this->assertEquals($opp->title, "Not found");
-        $this->assertEquals($opp->message, "Opportunity not found");
+        $this->assertEquals(count($opp->items), 0);
     }
 
     public function testListOpportunities() {
 
-        $opps = $this->client->listOpportunities();
+        $opps = $this->client->listOpportunities()->collection;
 
         $this->assertEquals($opps->href, "/api/opportunities");
         $this->assertEquals($opps->version, "1.0");
@@ -41,7 +49,7 @@ class ClientTest extends PHPUnit_Framework_TestCase {
 
         $params = [ 'q' => 'foster care' ];
 
-        $opps = $this->client->search($params);
+        $opps = $this->client->search($params)->collection;
 
         $this->assertEquals($opps->href, "/api/search?q=foster+care");
         $this->assertEquals($opps->version, "1.0");
@@ -57,7 +65,7 @@ class ClientTest extends PHPUnit_Framework_TestCase {
         ];
         $path = "/api/search?issues[]=Education&issues[]=Children%2FYouth&region[]=South&region[]=Central";
 
-        $opps = $this->client->search($params);
+        $opps = $this->client->search($params)->collection;
 
         $this->assertEquals($opps->href, $path);
         $this->assertEquals($opps->version, "1.0");
@@ -73,14 +81,23 @@ class ClientTest extends PHPUnit_Framework_TestCase {
         ];
         $path = "/api/search?q=foster+care&issues[]=Education&issues[]=Children%2FYouth&region[]=South&region[]=Central";
 
-        $opps = $this->client->search($params);
+        $opps = $this->client->search($params)->collection;
 
         $this->assertEquals($opps->href, $path);
         $this->assertEquals($opps->version, "1.0");
         $this->assertEquals(is_array($opps->items), true);
     }
 
-    public function testPostSignup() {
+    public function testGetSignup() {
+
+        $signup = $this->client->getSignup(1);
+        $this->assertEquals($signup->collection->version, "1.0");
+        $this->assertEquals(is_array($signup->collection->template->data), true);
+
+        $this->client->getEntryPoint();
+    }
+
+    public function testSubmitSignup() {
 
         $template = "{
             \"template\": {
@@ -91,56 +108,12 @@ class ClientTest extends PHPUnit_Framework_TestCase {
                     { \"name\": \"email\", \"value\": \"timothy.johnson@fakeemail.com\" },
                     { \"name\": \"comment\", \"value\": \"\" },
                     { \"name\": \"numOfItemsCommitted\", \"value\": 2 },
-                    { \"name\": \"lead\", \"object\": {\"stageAnnouncement,churchBulletinOrFlier\"} }
+                    { \"name\": \"lead\", \"value\": \"stageAnnouncement,churchBulletinOrFlier\" }
                 ]
             }
         }";
 
-        $opps = $this->client->postSignup(1, $template);
-        $this->assertEquals($opps->statusCode, 201);
+        $opps = $this->client->submitSignup(1, $template);
+        $this->assertEquals($opps->statusCode, 202);
     }
-
-    public function testGetSignup() {
-        $signup = $this->client->getSignup(1);
-        $this->assertEquals($signup->collection->version, "1.0");
-        $this->assertEquals(is_array($signup->collection->template->data), true);
-    }
-
-    /*public function loadTestSignup() {
-        $templateFile = fopen("./lib/signupTemplate.json", "r");
-        $templateJSON = "";
-
-        while (!feof($templateFile)) {
-            $templateJSON = $templateJSON . fread($templateFile, 100);
-        }
-
-        fclose($templateFile);
-        $templateJSON = json_decode($templateJSON, false);
-        $signup = new SignUp($templateJSON);
-        return $signup;
-    }
-
-    public function testSignupGetHTML() {
-        $signup = $this->loadTestSignup();
-
-        $document = new DOMDocument();
-        $inputDoc = $signup->getHTML($document, "churchCampus", "test", "austinStoneCC");
-        $document->appendChild($inputDoc);
-        $htmlString = $document->saveHTML();
-
-        // Validate the html
-        $doc = new DOMDocument();
-        $loaded = $doc->loadHTML($htmlString);
-        $this->assertTrue($loaded);
-    }
-
-    public function testSignupGetOptions() {
-        $signup = $this->loadTestSignup();
-
-        $optionsPossible = $signup->getOptions("church", "yes");
-        $this->assertEquals(count($optionsPossible), 9);
-
-        $optionsEmpty = $signup->getOptions("church", "no");
-        $this->assertEquals(count($optionsEmpty), 0);
-    }*/
 }
