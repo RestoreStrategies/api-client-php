@@ -258,7 +258,19 @@ class ForTheCityClient {
 
 		$path = '/api/opportunities/' . $id;
 
-		return ForTheCityClient::apiRequest($path, 'GET');
+        $result = ForTheCityClient::apiRequest($path, 'GET');
+
+        if ($result->collection->items) {
+            $opp = new Opportunity($this, $result->collection->items[0]);
+            $response = new Response($result, $opp);
+
+            return $response;
+        }
+        else {
+            $response = new Response($result, $result);
+
+            return $response;
+        }
 	}
 
 	/**
@@ -281,4 +293,76 @@ class ForTheCityClient {
 
 		return $result;
 	}
+}
+
+
+class Response {
+
+    private $response;
+    private $data;
+    private $error = NULL;
+
+    public function __construct($response, $data) {
+        $this->response = $response;
+        $this->data = $data;
+
+        if ($this->response->collection->error) {
+            $this->error = $this->response->collection->error;
+        }
+    }
+
+    public function response() {
+        return $this->response;
+    }
+
+    public function data() {
+        return $this->data;
+    }
+
+    public function error() {
+        return $this->error;
+    }
+}
+
+
+class Opportunity {
+
+    private $client;
+    public $href;
+    private $links;
+
+    /**
+    * Constructor
+    * 
+    * @param ForTheCityClient $client   An instance of the ForTheCityClient
+    * class
+    *
+    * @param object $item   An objectification of the JSON of a Collection+JSON
+    * item
+    */
+    public function __construct($client, $item) {
+
+        $this->client = $client;
+        $this->href = $item->href;
+        $this->links = $item->links;
+
+        foreach ($item->data as $elem) {
+            $this->{$elem->name} = $this->getValue($elem);
+        }
+    }
+
+    private function getValue($element) {
+
+        if ($element->value) {
+            return $element->value;
+        }
+        else if ($element->array) {
+            return $element->array;
+        }
+        else if ($element->object) {
+            return $element->object;
+        }
+
+        return NULL;
+    }
 }
