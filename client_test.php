@@ -15,18 +15,10 @@ class ClientTest extends PHPUnit_Framework_TestCase {
 
     public function testGetOpportunity() {
 
-        $opp = $this->client->getOpportunity(1)->collection;
-        $data = $opp->items[0]->data;
-        $found = false;
-        if (is_array($data)) {
-            foreach ($data as $datum) {
-                if ($datum->name === 'id' && $datum->value === '1') {
-                    $found = true;
-                    break;
-                }
-            }
-        }
-        $this->assertTrue($found);
+        $opp = $this->client->getOpportunity(1);
+
+        $href = $opp->collection->href;
+        $this->assertEquals($href, "/api/opportunities/1");
     }
 
     public function testNonexistingOpportunity() {
@@ -110,7 +102,7 @@ class ClientTest extends PHPUnit_Framework_TestCase {
             "lead" => "other"
        );
 
-        $opps = $this->client->submitSignup(1, $template);
-        $this->assertEquals($opps->statusCode, 202);
+        $signup = $this->client->submitSignup(1, $template);
+        $this->assertEquals($signup->status, 202);
     }
 }
