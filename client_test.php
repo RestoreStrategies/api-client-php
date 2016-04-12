@@ -33,7 +33,10 @@ class ClientTest extends PHPUnit_Framework_TestCase {
 
         $opp = $this->client->getOpportunity(1000000)->collection;
 
-        $this->assertEquals(count($opp->items), 0);
+        $error = $opp->error;
+        $this->assertEquals($error->code, 404);
+        $this->assertEquals($error->title, "Not found");
+        $this->assertEquals($error->message, "Opportunity not found");
     }
 
     public function testListOpportunities() {
@@ -93,25 +96,19 @@ class ClientTest extends PHPUnit_Framework_TestCase {
         $signup = $this->client->getSignup(1);
         $this->assertEquals($signup->collection->version, "1.0");
         $this->assertEquals(is_array($signup->collection->template->data), true);
-
-        $this->client->getEntryPoint();
     }
 
     public function testSubmitSignup() {
 
-        $template = "{
-            \"template\": {
-                \"data\": [
-                    { \"name\": \"givenName\", \"value\": \"Timothy\" },
-                    { \"name\": \"familyName\", \"value\": \"Johnson\" },
-                    { \"name\": \"telephone\", \"value\": \"829-384-6743\" },
-                    { \"name\": \"email\", \"value\": \"timothy.johnson@fakeemail.com\" },
-                    { \"name\": \"comment\", \"value\": \"\" },
-                    { \"name\": \"numOfItemsCommitted\", \"value\": 2 },
-                    { \"name\": \"lead\", \"value\": \"stageAnnouncement,churchBulletinOrFlier\" }
-                ]
-            }
-        }";
+        $template = array(
+            "givenName" => "Jon",
+            "familyName" => "Doe",
+            "telephone" => "5124567890",
+            "email" => "jon.doe@example.com",
+            "comment" => "I'm excited!",
+            "numOfItemsCommitted" => 1,
+            "lead" => "other"
+       );
 
         $opps = $this->client->submitSignup(1, $template);
         $this->assertEquals($opps->statusCode, 202);

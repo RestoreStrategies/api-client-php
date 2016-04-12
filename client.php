@@ -2,8 +2,6 @@
 
 class HawkHeader {
 
-	private static $headerVersion = 1;
-
 	/**
 	* Calculate the request HMAC
 	*
@@ -137,8 +135,6 @@ class RestoreStrategiesClient {
 	private $port;
 	private $algorithm = 'sha256';
 	private $credentials;
-	//private const $cachingDisabled = true;
-	private const $restfulUrisDisabled = true;
 
 	/**
 	* Constructor
@@ -272,11 +268,9 @@ class RestoreStrategiesClient {
 	*/
 	public function getOpportunity($id) {
 
-		$response = $this->search(array(
-			'id'=> "" . $id
-		));
+        $href = '/api/opportunities/' . $id;
 
-		return $response;
+        return $this->apiRequest($href, 'GET');
 	}
 
 	/**
@@ -286,69 +280,68 @@ class RestoreStrategiesClient {
 	*/
 	public function listOpportunities() {
 
-		if ($this->restfulUrisDisabled) {
-			$href = '/api/opportunities';
-		}
-		else {
-			$entryPoint = $this->getEntryPoint();
-			$href = $this->getRelationHref($entryPoint->collection->links, 'opportunities');
-		}
-
-		if ($href !== null) {
-			$response = $this->apiRequest($href, 'GET');
-		}
+		$href = '/api/opportunities';
+		$response = $this->apiRequest($href, 'GET');
 
 		return $response;
 	}
 
 	public function search($params) {
 
-		if ($this->restfulUrisDisabled) {
-			$href = '/api/search';
-		}
-		else {
-			$entryPoint = $this->getEntryPoint();
-			$href = $this->getRelationHref($entryPoint->collection->links, 'search');
-		}
-
-		if ($href !== null) {
-			$href .= "?" . $this->paramsToString($params);
-			$response = $this->apiRequest($href, 'GET');
-		}
+		$href = '/api/search';
+		$href .= "?" . $this->paramsToString($params);
+		$response = $this->apiRequest($href, 'GET');
 
 		return $response;
 	}
 
 	public function getSignup($id) {
 
-		if ($this->restfulUrisDisabled) {
-			$href = '/api/opportunities/' . $id . '/signup';
-		}
-		else {
-			$opp = $this->getOpportunity($id);
-			$href = $this->getRelationHref($opp->collection->items[0]->links, 'signup');
-		}
-
-		if ($href !== null) {
-			$response = $this->apiRequest($href, 'GET');
-		}
+		$href = '/api/opportunities/' . $id . '/signup';
+		$response = $this->apiRequest($href, 'GET');
 
 		return $response;
 	}
 
+    /*
+     * Signup for an opportunity
+     *
+     * @param integer $id         The id of the opportunity to signup for
+     *
+     * @param array   $template   An array of of template data
+     * Ex. array(
+     *          "givenName" => "Jon",
+     *          "familyName" => "Doe",
+     *          "telephone" => "404555555",
+     *          "email" => "jon.doe@example.com",
+     *          "comment" => "I'm excited!",
+     *          "numOfItemsCommitted" => 1,
+     *          "lead" => "other"
+     *     )
+     *
+     * @return object             An objectified version of the server's JSON
+     * response
+     */ 
 	public function submitSignup($id, $template) {
 
-		if ($this->restfulUrisDisabled) {
-			$href = '/api/opportunities/' . $id . '/signup';
-		}
-		else {
-			$opp = $this->getOpportunity($id);
-			$href = $this->getRelationHref($opp->collection->items[0]->links, 'signup');
-		}
+        $data = [];
+        $jsonStr = '{ "template": { "data": [';
 
-		if ($href !== null) {
-			$response = $this->apiRequest($href, 'POST', $template);
-		}
+        foreach ($template as $name => $value) {
+            if ($name == 'numOfItemsCommitted') {
+                $ele = '{ "name": "' . $name . '", "value": ' . $value . ' }';
+                array_push($data, $ele);
+            }
+            else {
+                $ele = '{ "name": "' . $name . '", "value": "' . $value . '" }';
+                array_push($data, $ele);
+            }
+        }
+
+        $jsonStr = $jsonStr . join(', ', $data) . '] } }';
+
+		$href = '/api/opportunities/' . $id . '/signup';
+		$response = $this->apiRequest($href, 'POST', $jsonStr);
 
 		return $response;
 	}
@@ -358,25 +351,4 @@ class RestoreStrategiesClient {
 		$response = $this->apiRequest('/api', 'GET');
 		return $response;
 	}
-
-	private function getRelationHref($data, $relation) {
-
-		if (is_array($data)) {
-			foreach ($data as $datum) {
-				if ($datum->rel === $relation) {
-					return $datum->href;
-				}
-			}
-		}
-		else {
-			if ($data->rel === $relation) {
-				return $data->href;
-			}
-		}
-	}
-
-	/*private function getFromCache($path) {
-		//TODO: add caching for appropriate stateful clients
-		return null;
-	}*/
 }
