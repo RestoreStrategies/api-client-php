@@ -1,6 +1,6 @@
 # For the City API PHP client
 
-This is a PHP client for the For the City Network's API. The API allows clients to view, filter, search & sign up for volunteer opportunities.
+This is a PHP client for the Restore Strategies's API. The API allows clients to view, filter, search & sign up for volunteer opportunities.
 
 ## Initializing
 
@@ -9,7 +9,7 @@ To use the API you need valid credentials. An instance of the API client require
 ```PHP
 require 'client.php';
 
-$apiClient = new ForTheCityClient('<a_user_token>', '<a_user_secet>');
+$apiClient = new RestoreStrategiesClient('<a_user_token>', '<a_user_secet>');
 ```
 
 ## Returned values
@@ -47,4 +47,26 @@ $searchParams = [
 ];
 
 $results = $apiClient->search($searchParams);
+```
+
+## Signup
+
+The client can submit signups for opportunities. In the below example, each of the keys are required
+
+```PHP
+ $template = array(
+     "givenName" => "Jon",
+     "familyName" => "Doe",
+     "telephone" => "5128675309",
+     "email" => "jon.doe@example.com",
+     "comment" => "I'm excited!",
+     "numOfItemsCommitted" => 1,
+     "lead" => "other"
+);
+
+$signup = $this->client->submitSignup(1, $template);
+
+if ($signup->status == 202) {
+    print 'The signup was accepted!';
+}
 ```
