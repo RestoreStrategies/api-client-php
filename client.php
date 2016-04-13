@@ -131,7 +131,7 @@ class RestoreStrategiesClient {
 
 	private $token;
 	private $secret;
-	private $host = 'https://api.forthecity.org';
+	private $host = 'http://api.restorestrategies.org';
 	private $port;
 	private $algorithm = 'sha256';
 	private $credentials;
