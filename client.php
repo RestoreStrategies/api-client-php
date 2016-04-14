@@ -6,7 +6,9 @@ class HawkHeader {
 	* Calculate the request HMAC
 	*
 	* @param string $type           'header', 'bewit', or 'respnse'
+    *
 	* @param array  $credentials    [id, key, algorithm]
+    *
 	* @param array  $options        [ts, nonce, method, resource, host, port,
 	*                                hash, ext]
 	*
@@ -21,10 +23,12 @@ class HawkHeader {
 	    return $digest;
 	}
 
+
 	/**
 	* Normalize string for generating MAC
 	*
 	* @param string $type           'header', 'bewit', or 'respnse'
+    *
 	* @param array  $options        [ts, nonce, method, resource, host, port,
 	*                                hash, ext]
 	*
@@ -41,7 +45,8 @@ class HawkHeader {
 	                    $resource . "\n" .
 	                    strtolower($options['host']) . "\n" .
 	                    $options['port'] . "\n" .
-	                    $options['hash'] . "\n";
+						$options['hash'] . "\n";
+
 
 	    if ($options['ext']) {
 	         $ext = str_replace("\\", "\\\\", $options['ext']);
@@ -54,23 +59,29 @@ class HawkHeader {
 	    return $normalized;
 	}
 
+
 	/**
 	* Generate Hawk header
 	*
 	* @param string $uri        The reqest URI
+    *
 	* @param string $method     The HTTP verb
+    *
 	* @param array  $options    [credentials, ext, ts, nonce,
 	*                            localtimeOffsetMsec, playload, contentType,
 	*                            hash]
 	*
 	* @return array             [field, artifacts]
 	*/
-	public static function generate($uri, $method, $options) {
+	public static function generate($options) {
 
 	    $result = [
 	        'field' => '',
 	        'artifacts' => []
 	    ];
+
+		$uri = $options['uri'];
+		$method = $options['method'];
 
 	    $host = parse_url($uri, PHP_URL_HOST);
 	    $port = parse_url($uri, PHP_URL_PORT);
@@ -88,8 +99,8 @@ class HawkHeader {
 	        'resource' => $resource,
 	        'host' => $host,
 	        'port' => $port,
-	        'hash' => $options['hash'],
-	        'ext' => $options['ext']
+			'hash' => $options['hash'],
+			'ext' => $options['ext']
 	    ];
 
 	    foreach (array_keys($result['artifacts']) as $key) {
@@ -120,14 +131,12 @@ class HawkHeader {
 	}
 }
 
-/**
- *
- */
-class ForTheCityClient {
+
+class RestoreStrategiesClient {
 
 	private $token;
 	private $secret;
-	private $host = 'https://api.forthecity.org';
+	private $host = 'http://api.restorestrategies.org';
 	private $port;
 	private $algorithm = 'sha256';
 	private $credentials;
@@ -136,9 +145,12 @@ class ForTheCityClient {
 	* Constructor
 	*
 	* @param string $token      A valid API user token
+    *
 	* @param string $secret     A valid API user secret
+    *
 	* @param string $host       (optional) Scheme + host (e.g. http://example.com).
-	*                           defaults to https://api.forthecity.org
+	*                           defaults to http://api.restorestrategies.org
+    *
 	* @param integer $port      (optional) TCP port, defaults to 80 or 443
 	*                           depending on the scheme used on the host
 	*/
@@ -174,44 +186,59 @@ class ForTheCityClient {
 		];
 	}
 
+
 	/**
 	* Make an API request
 	*
 	* @param string $path   A valid URL path
+    *
 	* @param string $verb   An HTTP verb
+    *
 	* @param string $data   (optional) Data to be sent to the server, e.g. in a
 	*                       POST request
-	* @return object        An objectified version of the server's JSON response
+    *
+	* @return object        A Response object
 	*/
 	private function apiRequest($path, $verb, $data = null) {
 
 		$uri = $this->host . $path;
 
-		$hawkOptions = [
-			'credentials' => $this->credentials,
-		];
-
-		if ($data) {
-			$hawkOptions['ext'] = $data;
-		}
-
-		$header = HawkHeader::generate($uri, $verb, $hawkOptions);
+		$opts = array(
+			'method'=>"" . $verb,
+			'header'=>array('Content-type'=> "application/vnd.collection+json",
+					'api-version'=> "1"),
+			'uri'=> $uri,
+			'ext'=> '',
+			'credentials' => $this->credentials
+		);
 
 		$curlSession = curl_init();
-		$curlOptions = [
-			CURLOPT_HTTPHEADER => [
-				'Content-type: Application+JSON',
-				'api-version: 1',
-				'Authorization: ' . $header['field']
-			],
-			CURLOPT_URL => $uri,
-			CURLOPT_RETURNTRANSFER => true
-		];
+
+		$verb = strtolower($verb);
+
+		if ($verb === 'post') {
+			$curlOptions[CURLOPT_POSTFIELDS] = $data;
+		}
+
+		$header = HawkHeader::generate($opts);
+
+		$curlOptions[CURLOPT_URL] = $uri;
+		$curlOptions[CURLOPT_RETURNTRANSFER] = true;
 
 		curl_setopt_array($curlSession, $curlOptions);
+		curl_setopt($curlSession, CURLOPT_HTTPHEADER, array(
+				'Content-type: application/vnd.collection+json',
+				'api-version: 1',
+				'Authorization: ' . $header['field']
+		));
 
-		return json_decode(curl_exec($curlSession));
+		$jsonObj = json_decode(curl_exec($curlSession));
+
+        $response = new Response($jsonObj, $this);
+
+		return $response;
 	}
+
 
 	/**
 	* Turn an array of data into a URL query string
@@ -245,78 +272,250 @@ class ForTheCityClient {
 		return $queryString;
 	}
 
+
 	/**
 	* GET a specific opportunity
 	*
 	* @param integer $id    The id of an opportunity
 	*
-	* @return object        An objectified version of the server's JSON
-	*                       response. Normally, this will either be an
-	*                       opportunity or a 404 message.
-	*/
+    * @return object        A Response object
+    */
 	public function getOpportunity($id) {
 
-		$path = '/api/opportunities/' . $id;
+        $href = '/api/opportunities/' . $id;
 
-        $result = ForTheCityClient::apiRequest($path, 'GET');
+        $result = $this->apiRequest($href, 'GET');
 
-        if ($result->collection->items) {
-            $opp = new Opportunity($this, $result->collection->items[0]);
-            $response = new Response($result, $opp);
-
-            return $response;
-        }
-        else {
-            $response = new Response($result, $result);
-
-            return $response;
-        }
+        return $result;
 	}
+
 
 	/**
 	* Get a list of all opportunities
 	*
-	* @return object	An objectified version of the server's JSON response
+	* @return object	A Response object
 	*/
 	public function listOpportunities() {
 
-		$path = '/api/opportunities';
-		$result = ForTheCityClient::apiRequest($path, 'GET')->collection;
+		$href = '/api/opportunities';
+		$response = $this->apiRequest($href, 'GET');
 
-		return $result;
+		return $response;
 	}
 
+
+    /**
+     * Search opportunities
+     *
+     * @param array $params     An array of search parameters. Acceptable 
+     * options are given by the below Collection+JSON query template:
+     *
+     * {
+     *     href: '/api/search',
+     *     rel: 'search',
+     *     prompt: 'Search for opportunities',
+     *     data: [
+     *         {
+     *             name: 'q',
+     *             prompt: '(optional) Enter search string',
+     *             value: ''
+     *         },
+     *         {
+     *             name: 'issues',
+     *             prompt: '(optional) Select 0 or more issues',
+     *             array: [
+     *                 'Children/Youth',
+     *                 'Elderly',
+     *                 'Family/Community',
+     *                 'Foster Care/Adoption',
+     *                 'Healthcare',
+     *                 'Homelessness',
+     *                 'Housing',
+     *                 'Human Trafficking',
+     *                 'International/Refugee',
+     *                 'Job Training',
+     *                 'Sanctity of Life',
+     *                 'Sports',
+     *                 'Incarceration'
+     *           ]
+     *       },
+     *       {
+     *           name: 'region',
+     *           prompt: '(optional) Select 0 or more geographical regions',
+     *           array: [
+     *               'North',
+     *               'Central',
+     *               'East',
+     *               'West',
+     *               'Other'
+     *           ]
+     *       },
+     *       {
+     *           name: 'time',
+     *           prompt: '(optional) Select 0 or more times of day',
+     *           array: [
+     *               'Morning',
+     *               'Mid-Day',
+     *               'Afternoon',
+     *               'Evening'
+     *           ]
+     *       },
+     *       {
+     *           name: 'day',
+     *           prompt: '(optional) Select 0 or more days of the week',
+     *           array: [
+     *               'Monday',
+     *               'Tuesday',
+     *               'Wednesday',
+     *               'Thursday',
+     *               'Friday',
+     *               'Saturday',
+     *               'Sunday'
+     *           ]
+     *        },
+     *        {
+     *            name: 'type',
+     *            prompt: '(optional) Select 0 or more opportunity types',
+     *            array: [
+     *                'Gift',
+     *                'Service',
+     *                'Specific Gift',
+     *                'Training'
+     *            ]
+     *        },
+     *        {
+     *            name: 'group_type',
+     *            prompt: '(optional) Select 0 or more volunteer group types',
+     *            array: [
+     *                'Individual',
+     *                'Group',
+     *                'Family'
+     *            ]
+     *        }
+     *   ]
+     * }
+     *
+     * Example: $params = [
+     *              'q' => 'foster care',
+     *              'issues' => ['Education', 'Children/Youth'],
+     *              'region' => ['South', 'Central']
+     *          ];
+     *
+     * @return object           A Response object
+     */
 	public function search($params) {
 
-		$path = '/api/search?' . ForTheCityClient::paramsToString($params);
-		$result = ForTheCityClient::apiRequest($path, 'GET')->collection;
+		$href = '/api/search';
+		$href .= "?" . $this->paramsToString($params);
+		$response = $this->apiRequest($href, 'GET');
 
-		return $result;
+		return $response;
+	}
+
+
+    /**
+     * Get a signup template
+     *
+     * @param integer $id   The id of an opportunity
+     *
+     * @return object       A Response object
+     */ 
+	public function getSignup($id) {
+
+		$href = '/api/opportunities/' . $id . '/signup';
+		$response = $this->apiRequest($href, 'GET');
+
+		return $response;
+	}
+
+
+    /*
+     * Signup for an opportunity
+     *
+     * @param integer $id         The id of the opportunity to signup for
+     *
+     * @param array   $template   An array of of template data
+     * Ex. array(
+     *          "givenName" => "Jon",
+     *          "familyName" => "Doe",
+     *          "telephone" => "404555555",
+     *          "email" => "jon.doe@example.com",
+     *          "comment" => "I'm excited!",
+     *          "numOfItemsCommitted" => 1,
+     *          "lead" => "other"
+     *     )
+     *
+     * @return object             A Response object
+     */ 
+	public function submitSignup($id, $template) {
+
+        $data = [];
+        $jsonStr = '{ "template": { "data": [';
+
+        foreach ($template as $name => $value) {
+            if ($name == 'numOfItemsCommitted') {
+                $ele = '{ "name": "' . $name . '", "value": ' . $value . ' }';
+                array_push($data, $ele);
+            }
+            else {
+                $ele = '{ "name": "' . $name . '", "value": "' . $value . '" }';
+                array_push($data, $ele);
+            }
+        }
+
+        $jsonStr = $jsonStr . join(', ', $data) . '] } }';
+
+		$href = '/api/opportunities/' . $id . '/signup';
+		$response = $this->apiRequest($href, 'POST', $jsonStr);
+
+		return $response;
 	}
 }
 
 
 class Response {
 
-    private $response;
-    private $data;
+    private $raw;
+    private $items = [];
     private $error = NULL;
+    private $client;
 
-    public function __construct($response, $data) {
-        $this->response = $response;
-        $this->data = $data;
+    /**
+     * Constructor
+     *
+     * @param object $response  An objectified version of the server's JSON
+     * response.
+     */ 
+    public function __construct($response, $client) {
+        $this->raw = $response;
+        $this->client = $client;
 
-        if ($this->response->collection->error) {
-            $this->error = $this->response->collection->error;
+        if ($this->raw->collection->error) {
+            $this->error = $this->raw->collection->error;
+        }
+
+        if ($this->raw->collection->items) {
+            $this->createData($this->raw->collection->items);
         }
     }
 
-    public function response() {
-        return $this->response;
+    private function createData($items) {
+
+        if (!is_array($items)) {
+            return -1;
+        }
+
+        foreach ($items as $item) {
+            array_push($this->items, new Opportunity($this->client, $item));
+        }
     }
 
-    public function data() {
-        return $this->data;
+    public function raw() {
+        return $this->raw;
+    }
+
+    public function items() {
+        return $this->items;
     }
 
     public function error() {
@@ -346,8 +545,10 @@ class Opportunity {
         $this->href = $item->href;
         $this->links = $item->links;
 
-        foreach ($item->data as $elem) {
-            $this->{$elem->name} = $this->getValue($elem);
+        if ($item->data) {
+            foreach ($item->data as $elem) {
+                $this->{$elem->name} = $this->getValue($elem);
+            }
         }
     }
 

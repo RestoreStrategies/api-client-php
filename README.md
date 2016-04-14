@@ -1,6 +1,6 @@
-# For the City API PHP client
+# Restore Strategies's API PHP client
 
-This is a PHP client for the For the City Network's API. The API allows clients to view, filter, search & sign up for volunteer opportunities.
+This is a PHP client for the Restore Strategies's API. The API allows clients to view, filter, search & sign up for volunteer opportunities.
 
 ## Initializing
 
@@ -9,23 +9,28 @@ To use the API you need valid credentials. An instance of the API client require
 ```PHP
 require 'client.php';
 
-$apiClient = new ForTheCityClient('<a_user_token>', '<a_user_secet>');
+$apiClient = new RestoreStrategiesClient('<a_user_token>', '<a_user_secet>');
 ```
 
 ## Returned values
 
-This client returns an objectification of the the server's JSON response.
+This client returns Response objects. A Response object has 3 functions:
+
+* ```raw()```, an objectified version of the server's raw JSON response
+* ```items()```, an array of opportunities, if any exist
+* ```error()```, an error message, if it exists
 
 ## Viewing Opportunities
 
 It is possible to view opportunities individually or all at once.
 
 ```PHP
-// Gets the opportunity that has an id of 10.
-$opportunity = $apiClient->getOpportunity(10);
+// Gets the opportunity that has an id of 10 & print it's name.
+$response = $apiClient->getOpportunity(10);
+print 'This opportunity is called ' . $response->items()[0]->name;
 
 // Gets all of the opportunities
-$opportunities = $apiClient->listOpportunities();
+$listResponse = $apiClient->listOpportunities();
 ```
 
 ## Search
@@ -46,5 +51,27 @@ $searchParams = [
     'issues' => ['Children/Youth', 'Education']
 ];
 
-$results = $apiClient->search($searchParams);
+$response = $apiClient->search($searchParams);
+```
+
+## Signup
+
+The client can submit signups for opportunities. In the below example, each of the keys are required
+
+```PHP
+ $template = array(
+     "givenName" => "Jon",
+     "familyName" => "Doe",
+     "telephone" => "5128675309",
+     "email" => "jon.doe@example.com",
+     "comment" => "I'm excited!",
+     "numOfItemsCommitted" => 1,
+     "lead" => "other"
+);
+
+$response = $this->client->submitSignup(1, $template);
+
+if ($response->raw()->status == 202) {
+    print 'The signup was accepted!';
+}
 ```
