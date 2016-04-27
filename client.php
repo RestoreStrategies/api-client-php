@@ -340,7 +340,7 @@ class RestoreStrategiesClient {
      *           ]
      *       },
      *       {
-     *           name: 'region',
+     *           name: 'regions',
      *           prompt: '(optional) Select 0 or more geographical regions',
      *           array: [
      *               'North',
@@ -351,7 +351,7 @@ class RestoreStrategiesClient {
      *           ]
      *       },
      *       {
-     *           name: 'time',
+     *           name: 'times',
      *           prompt: '(optional) Select 0 or more times of day',
      *           array: [
      *               'Morning',
@@ -361,7 +361,7 @@ class RestoreStrategiesClient {
      *           ]
      *       },
      *       {
-     *           name: 'day',
+     *           name: 'days',
      *           prompt: '(optional) Select 0 or more days of the week',
      *           array: [
      *               'Monday',
@@ -384,7 +384,7 @@ class RestoreStrategiesClient {
      *            ]
      *        },
      *        {
-     *            name: 'group_type',
+     *            name: 'group_types',
      *            prompt: '(optional) Select 0 or more volunteer group types',
      *            array: [
      *                'Individual',

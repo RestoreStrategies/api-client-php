@@ -39,11 +39,11 @@ The search function takes an array with keys & values. The following are possibl
 
 * q: Free-form search term for fulltext search
 * issues: An array of issues. Acceptable values: 'Children/Youth', 'Elderly', 'Family/Community', 'Foster Care/Adoption', 'Healthcare', 'Homelessness', 'Housing', 'Human Trafficking', 'International/Refugee', 'Job Training', 'Sanctity of Life', 'Sports', and 'Incarceration'
-* region: An array of geographical regions. Acceptable values: 'North', 'Central', 'East', 'West', and 'Other'
-* time: An array of times of day. Acceptable values: 'Morning', 'Mid-Day', 'Afternoon', 'Evening'
-* day: An array of days of the week. Acceptable values: 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', and 'Sunday'
+* regions: An array of geographical regions. Acceptable values: 'North', 'Central', 'East', 'West', and 'Other'
+* times: An array of times of day. Acceptable values: 'Morning', 'Mid-Day', 'Afternoon', 'Evening'
+* days: An array of days of the week. Acceptable values: 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', and 'Sunday'
 * type: An array of opportunity types. Acceptable values: 'Gift', 'Service', 'Specific Gift', 'Training'
-* group_type: An array of volunteer group types. Acceptable values: 'Individual', 'Group', 'Family'
+* group_types: An array of volunteer group types. Acceptable values: 'Individual', 'Group', 'Family'
 
 ```PHP
 $searchParams = [
