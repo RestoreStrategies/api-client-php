@@ -1,7 +1,5 @@
 <?php
 
-require './lib/signup.php';
-
 class ClientTest extends PHPUnit_Framework_TestCase {
 
     private $client;
@@ -81,6 +79,19 @@ class ClientTest extends PHPUnit_Framework_TestCase {
 
         $response = $this->client->search($params);
         $collection = $response->raw()->collection;
+
+        $this->assertEquals($collection->href, $path);
+        $this->assertEquals($collection->version, "1.0");
+        $this->assertEquals(is_array($response->items()), true);
+    }
+
+    public function testSearchBlankParams() {
+
+        $params = [];
+
+        $response = $this->client->search($params);
+        $collection = $response->raw()->collection;
+        $path = "/api/search?";
 
         $this->assertEquals($collection->href, $path);
         $this->assertEquals($collection->version, "1.0");
