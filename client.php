@@ -143,6 +143,7 @@ class RestoreStrategiesClient {
 	private $port;
 	private $algorithm = 'sha256';
 	private $credentials;
+    private $user_agent = 'Restore Strategies PHP client';
 
 	/**
 	* Constructor
@@ -156,8 +157,11 @@ class RestoreStrategiesClient {
     *
 	* @param integer $port      (optional) TCP port, defaults to 80 or 443
 	*                           depending on the scheme used on the host
+    *
+    * @param string $agent      (optional) User agent. Defaults to
+    *                           'Restore Strategies PHP client'
 	*/
-	public function __construct($token, $secret, $host = null, $port = null) {
+	public function __construct($token, $secret, $host = null, $port = null, $agent = null) {
 
 		$this->token = $token;
 		$this->secret = $secret;
@@ -165,6 +169,10 @@ class RestoreStrategiesClient {
 		if ($host) {
 			$this->host = $host;
 		}
+
+        if ($agent) {
+            $this->user_agent = $agent;
+        }
 
 		if ($port) {
 			$this->port = $port;
@@ -227,6 +235,7 @@ class RestoreStrategiesClient {
 
 		$curlOptions[CURLOPT_URL] = $uri;
 		$curlOptions[CURLOPT_RETURNTRANSFER] = true;
+        $curlOptions[CURLOPT_USERAGENT] = $this->user_agent;
 
 		curl_setopt_array($curlSession, $curlOptions);
 		curl_setopt($curlSession, CURLOPT_HTTPHEADER, array(

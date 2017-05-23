@@ -8,7 +8,9 @@ class ClientTest extends PHPUnit_Framework_TestCase {
         $this->client = new RestoreStrategiesClient($_ENV['TOKEN'],
                                                 $_ENV['SECRET'],
                                                 $_ENV['HOST'],
-                                                $_ENV['PORT']);
+                                                $_ENV['PORT'],
+                                                'Restore PHP Test Client'
+                                            );
     }
 
     public function testGetOpportunity() {
