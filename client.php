@@ -91,6 +91,9 @@ class HawkHeader {
 	    if ($query) {
 	        $resource = $resource . "?" . $query;
 	    }
+        else if (preg_match('/\?$/', $uri) == 1) { // case: /api/search?
+            $resource = $resource . "?";
+        }
 
 	    $result['artifacts'] = [
 	        'ts' => time(),

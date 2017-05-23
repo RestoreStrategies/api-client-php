@@ -80,7 +80,7 @@ fi
 # -t
 # Run tests.
 if [ "$1" = "-t" ]; then
-	docker run --rm -v $PWD:/opt/app -e HOST=$HOST -e PORT=$PORT \
+	docker run --rm -t -v $PWD:/opt/app -e HOST=$HOST -e PORT=$PORT \
 	-e TOKEN=$TOKEN -e SECRET=$SECRET --link forthecity-api:api \
 	$image_name /bin/bash -c \
 	"phpunit -v --debug --colors=always --bootstrap client.php client_test.php"
