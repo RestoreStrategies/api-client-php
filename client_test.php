@@ -13,6 +13,10 @@ class ClientTest extends PHPUnit_Framework_TestCase {
                                             );
     }
 
+    public function testVersion() {
+        $this->assertEquals($this->client->version(), '1.0.1');
+    }
+
     public function testGetOpportunity() {
 
         $response = $this->client->getOpportunity(1);

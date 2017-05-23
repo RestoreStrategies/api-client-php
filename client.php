@@ -137,6 +137,8 @@ class HawkHeader {
 
 class RestoreStrategiesClient {
 
+    const VERSION = '1.0.1';
+
 	private $token;
 	private $secret;
 	private $host = 'http://api.restorestrategies.org';
@@ -197,6 +199,12 @@ class RestoreStrategiesClient {
 		];
 	}
 
+    /**
+     * Get client version
+     */
+    public function version() {
+        return self::VERSION;
+    }
 
 	/**
 	* Make an API request
