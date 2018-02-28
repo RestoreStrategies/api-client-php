@@ -60,13 +60,15 @@ The client can submit signups for opportunities. In the below example, each of t
 
 ```PHP
  $template = array(
-     "givenName" => "Jon",
-     "familyName" => "Doe",
-     "telephone" => "5128675309",
-     "email" => "jon.doe@example.com",
+     "givenName" => "Jon", // required
+     "familyName" => "Doe", // required
+     "telephone" => "5128675309", // required
+     "email" => "jon.doe@example.com", // required
      "comment" => "I'm excited!",
-     "numOfItemsCommitted" => 1,
-     "lead" => "other"
+     "numOfItemsCommitted" => 1, // only useful for gift opportunities
+     "lead" => "other",
+     "campus" => "Example Campus",
+     "church" => "Example Church" // defaults to API user's church name
 );
 
 $response = $this->client->submitSignup(1, $template);
