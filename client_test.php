@@ -129,4 +129,19 @@ class ClientTest extends PHPUnit_Framework_TestCase {
 
         $this->assertEquals($response->raw()->status, 202);
     }
+
+    public function testSubmitSignupLineBreaks() {
+
+        $template = array(
+            "givenName" => "Jon",
+            "familyName" => "Doe",
+            "telephone" => "5124567890",
+            "email" => "jon.doe@example.com",
+            "comment" => "I'm excited!\n\r\nwith this!",
+            "lead" => "other"
+       );
+
+        $response = $this->client->submitSignup(1, $template);
+        $this->assertEquals($response->raw()->status, 202);
+    }
 }

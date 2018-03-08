@@ -137,7 +137,7 @@ class HawkHeader {
 
 class RestoreStrategiesClient {
 
-    const VERSION = '1.0.1';
+    const VERSION = '1.0.2';
 
 	private $token;
 	private $secret;
@@ -473,18 +473,11 @@ class RestoreStrategiesClient {
         $jsonStr = '{ "template": { "data": [';
 
         foreach ($template as $name => $value) {
-            if ($name == 'numOfItemsCommitted') {
-                $ele = '{ "name": "' . $name . '", "value": ' . $value . ' }';
-                array_push($data, $ele);
-            }
-            else {
-                $ele = '{ "name": "' . $name . '", "value": "' . $value . '" }';
-                array_push($data, $ele);
-            }
+            $ele = '{ "name": "' . $name . '", "value": ' . json_encode($value) . ' }';
+            array_push($data, $ele);
         }
 
         $jsonStr = $jsonStr . join(', ', $data) . '] } }';
-
 		$href = '/api/opportunities/' . $id . '/signup';
 		$response = $this->apiRequest($href, 'POST', $jsonStr);
 
