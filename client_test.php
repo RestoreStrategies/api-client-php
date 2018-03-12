@@ -14,7 +14,7 @@ class ClientTest extends PHPUnit_Framework_TestCase {
     }
 
     public function testVersion() {
-        $this->assertEquals($this->client->version(), '1.0.1');
+        $this->assertEquals($this->client->version(), '1.0.2');
     }
 
     public function testGetOpportunity() {

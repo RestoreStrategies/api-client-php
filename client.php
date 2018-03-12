@@ -176,6 +176,8 @@ class RestoreStrategiesClient {
             $this->user_agent = $agent;
         }
 
+        $this->user_agent .= " (PHP Client/" . $this->version() . ")";
+
 		if ($port) {
 			$this->port = $port;
 		}
@@ -240,10 +242,11 @@ class RestoreStrategiesClient {
 		}
 
 		$header = HawkHeader::generate($opts);
+        $agent = $_SERVER['HTTP_USER_AGENT'] . " " . $this->user_agent;
 
 		$curlOptions[CURLOPT_URL] = $uri;
 		$curlOptions[CURLOPT_RETURNTRANSFER] = true;
-        $curlOptions[CURLOPT_USERAGENT] = $this->user_agent;
+        $curlOptions[CURLOPT_USERAGENT] = $agent;
 
 		curl_setopt_array($curlSession, $curlOptions);
 		curl_setopt($curlSession, CURLOPT_HTTPHEADER, array(
