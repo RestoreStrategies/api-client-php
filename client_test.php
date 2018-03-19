@@ -45,6 +45,17 @@ class ClientTest extends PHPUnit_Framework_TestCase {
         $this->assertEquals(is_array($response->items()), true);
     }
 
+    public function testFeaturedOpportunities() {
+
+        $response = $this->client->featuredOpportunities();
+        var_dump($response);
+        $collection = $response->raw()->collection;
+
+        $this->assertEquals($collection->href, "/api/opportunities/featured");
+        $this->assertEquals($collection->version, "1.0");
+        $this->assertEquals(is_array($response->items()), true);
+    }
+
     public function testSearchFullText() {
 
         $params = [ 'q' => 'foster care' ];

@@ -137,7 +137,7 @@ class HawkHeader {
 
 class RestoreStrategiesClient {
 
-    const VERSION = '1.0.2';
+    const VERSION = '1.1.0';
 
 	private $token;
 	private $secret;
@@ -325,6 +325,20 @@ class RestoreStrategiesClient {
 
 		return $response;
 	}
+
+
+    /**
+     * Get a list of featured opportunities
+     *
+     * @return object	A Response object
+     */
+    public function featuredOpportunities() {
+
+		$href = '/api/opportunities/featured';
+		$response = $this->apiRequest($href, 'GET');
+
+		return $response;
+    }
 
 
     /**
