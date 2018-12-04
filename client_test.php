@@ -1,20 +1,23 @@
 <?php
 
-class ClientTest extends PHPUnit_Framework_TestCase {
+use PHPUnit\Framework\TestCase;
 
-    private $client;
+class ClientTest extends TestCase {
 
-    public function __construct() {
-        $this->client = new RestoreStrategiesClient($_ENV['TOKEN'],
-                                                $_ENV['SECRET'],
-                                                $_ENV['HOST'],
-                                                $_ENV['PORT'],
-                                                'Restore PHP Test Client'
-                                            );
+    protected $client;
+
+    public function setUp() {
+        $this->client  = new RestoreStrategiesClient(
+            $_ENV['TOKEN'],
+            $_ENV['SECRET'],
+            $_ENV['HOST'],
+            $_ENV['PORT'],
+            'Restore PHP Test Client'
+        );
     }
 
     public function testVersion() {
-        $this->assertEquals($this->client->version(), '1.0.2');
+        $this->assertEquals($this->client->version(), '1.1.0');
     }
 
     public function testGetOpportunity() {
@@ -48,7 +51,6 @@ class ClientTest extends PHPUnit_Framework_TestCase {
     public function testFeaturedOpportunities() {
 
         $response = $this->client->featuredOpportunities();
-        var_dump($response);
         $collection = $response->raw()->collection;
 
         $this->assertEquals($collection->href, "/api/opportunities/featured");
