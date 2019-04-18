@@ -31,6 +31,11 @@ print 'This opportunity is called ' . $response->items()[0]->name;
 
 // Gets all of the opportunities
 $listResponse = $apiClient->listOpportunities();
+
+// If your API user is in a different city than you're interested in, you can
+// specify the city of interest
+$response = $apiClient->getOpportunity(10, 'Austin');
+$listResponse = $apiClient->listOpportunities('Austin');
 ```
 
 ## Search
@@ -53,6 +58,10 @@ $searchParams = [
 ];
 
 $response = $apiClient->search($searchParams);
+
+// If your API user is in a different city than you're interested in, you can
+// specify the city of interest
+$response = $apiClient->search($searchParams, 'Austin');
 ```
 
 ## Signup

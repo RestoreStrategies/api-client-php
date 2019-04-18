@@ -28,6 +28,14 @@ class ClientTest extends TestCase {
         $this->assertEquals($href, "/api/opportunities/1");
     }
 
+    public function testGetDifferentCityOpportunity() {
+        $response = $this->client->getOpportunity(2, 'Waco');
+
+        $href = $response->items()[0]->href;
+        $this->assertEquals($href, "/api/opportunities/2");
+
+    }
+
     public function testNonexistingOpportunity() {
 
         $response = $this->client->getOpportunity(1000000);
@@ -48,6 +56,17 @@ class ClientTest extends TestCase {
         $this->assertEquals(is_array($response->items()), true);
     }
 
+    public function testListDifferentCityOpportunities() {
+
+        $response = $this->client->listOpportunities('Waco');
+        $collection = $response->raw()->collection;
+
+        $this->assertEquals($collection->href, "/api/opportunities?city=Waco");
+        $this->assertEquals($collection->version, "1.0");
+        $this->assertEquals(is_array($response->items()), true);
+    }
+
+
     public function testFeaturedOpportunities() {
 
         $response = $this->client->featuredOpportunities();
@@ -66,6 +85,18 @@ class ClientTest extends TestCase {
         $collection = $response->raw()->collection;
 
         $this->assertEquals($collection->href, "/api/search?q=foster+care");
+        $this->assertEquals($collection->version, "1.0");
+        $this->assertEquals(is_array($response->items()), true);
+    }
+
+    public function testSearchInDifferentCity() {
+
+        $params = [ 'q' => 'Foster Care Baby Care Part 1 -- Waco' ];
+
+        $response = $this->client->search($params, 'Waco');
+        $collection = $response->raw()->collection;
+
+        $this->assertEquals($collection->href, "/api/search?q=Foster+Care+Baby+Care+Part+1+--+Waco&city=Waco");
         $this->assertEquals($collection->version, "1.0");
         $this->assertEquals(is_array($response->items()), true);
     }

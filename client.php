@@ -137,7 +137,7 @@ class HawkHeader {
 
 class RestoreStrategiesClient {
 
-    const VERSION = '1.1.0';
+    const VERSION = '1.2.0';
 
 	private $token;
 	private $secret;
@@ -300,12 +300,20 @@ class RestoreStrategiesClient {
 	* GET a specific opportunity
 	*
 	* @param integer $id    The id of an opportunity
+    *
+    * @param string $city   (optional) The franchise city the opportunity
+    *                       belongs to. This parameter is only useful if the
+    *                       opportunity is outside of your franchise city.
 	*
     * @return object        A Response object
     */
-	public function getOpportunity($id) {
+	public function getOpportunity($id, $city = NULL) {
 
         $href = '/api/opportunities/' . $id;
+
+        if($city) {
+            $href .= '?city=' . $city;
+        }
 
         $result = $this->apiRequest($href, 'GET');
 
@@ -316,11 +324,20 @@ class RestoreStrategiesClient {
 	/**
 	* Get a list of all opportunities
 	*
+    * @param string $city   (optional) The franchise city. This parameter is
+    *                       only useful if the opportunities you wish to list are
+    *                       outside of your franchise city.
+    *
 	* @return object	A Response object
 	*/
-	public function listOpportunities() {
+	public function listOpportunities($city = NULL) {
 
 		$href = '/api/opportunities';
+
+        if($city) {
+            $href .= '?city=' . $city;
+        }
+
 		$response = $this->apiRequest($href, 'GET');
 
 		return $response;
@@ -438,12 +455,21 @@ class RestoreStrategiesClient {
      *              'region' => ['South', 'Central']
      *          ];
      *
+     * @param string $city  (optional) The franchise city. This parameter is
+     *                      only useful if the opportunities you wish to search
+     *                      are outside of your franchise city.
+     *
      * @return object           A Response object
      */
-	public function search($params) {
+	public function search($params, $city = NULL) {
 
 		$href = '/api/search';
 		$href .= "?" . $this->paramsToString($params);
+
+        if($city) {
+            $href .= '&city=' . $city;
+        }
+
 		$response = $this->apiRequest($href, 'GET');
 
 		return $response;
