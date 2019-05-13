@@ -17,7 +17,7 @@ class ClientTest extends TestCase {
     }
 
     public function testVersion() {
-        $this->assertEquals($this->client->version(), '1.1.0');
+        $this->assertEquals($this->client->version(), '1.2.0');
     }
 
     public function testGetOpportunity() {
