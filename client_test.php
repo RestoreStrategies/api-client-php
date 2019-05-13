@@ -1,12 +1,9 @@
 <?php
 
-use PHPUnit\Framework\TestCase;
+class ClientTest extends PHPUnit_Framework_TestCase {
+    private $client;
 
-class ClientTest extends TestCase {
-
-    protected $client;
-
-    public function setUp() {
+    public function __construct() {
         $this->client  = new RestoreStrategiesClient(
             $_ENV['TOKEN'],
             $_ENV['SECRET'],
