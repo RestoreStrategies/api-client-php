@@ -137,7 +137,7 @@ class HawkHeader {
 
 class RestoreStrategiesClient {
 
-    const VERSION = '1.2.0';
+    const VERSION = '1.3.0';
 
 	private $token;
 	private $secret;
@@ -349,9 +349,14 @@ class RestoreStrategiesClient {
      *
      * @return object	A Response object
      */
-    public function featuredOpportunities() {
+    public function featuredOpportunities($city = NULL) {
 
 		$href = '/api/opportunities/featured';
+
+        if($city) {
+            $href .= '?city=' . $city;
+        }
+
 		$response = $this->apiRequest($href, 'GET');
 
 		return $response;
@@ -510,7 +515,7 @@ class RestoreStrategiesClient {
      *
      * @return object             A Response object
      */ 
-	public function submitSignup($id, $template) {
+	public function submitSignup($id, $template, $city = NULL) {
 
         $data = [];
         $jsonStr = '{ "template": { "data": [';
@@ -522,6 +527,11 @@ class RestoreStrategiesClient {
 
         $jsonStr = $jsonStr . join(', ', $data) . '] } }';
 		$href = '/api/opportunities/' . $id . '/signup';
+
+        if($city) {
+            $href .= '?city=' . $city;
+        }
+
 		$response = $this->apiRequest($href, 'POST', $jsonStr);
 
 		return $response;

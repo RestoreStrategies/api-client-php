@@ -83,6 +83,10 @@ The client can submit signups for opportunities. In the below example, each of t
 
 $response = $this->client->submitSignup(1, $template);
 
+// or signup in a particular city
+$response = $this->client->submitSignup(1, $template, 'Austin');
+
+
 if ($response->raw()->status == 202) {
     print 'The signup was accepted!';
 }
